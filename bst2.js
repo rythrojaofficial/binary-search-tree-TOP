@@ -1,7 +1,7 @@
 // Build a Node class/factory. It should have an attribute for the data it stores as well as its left and right children.
 class Node{
-    constructor(value){
-        this.value = value;
+    constructor(data){
+        this.data = data;
         this.left = null;
         this.right = null;
     }
@@ -17,11 +17,38 @@ export class Tree{
         this.sortedArray = sortArray(array) // sort Array
         this.root = recursiveBuildTree(this.sortedArray);
     }
-    
+    insert(value, root = this.root){
+        switch (true){
+            case value < root.data
+                && root.left === null: 
+                { 
+                    let newNode = new Node(value);
+                    root.left = newNode;
+                    break;
+                }
+            case value > root.data
+                && root.right === null:
+                { 
+                    let newNode = new Node(value);
+                    root.right = newNode;
+                    break;
+                }
+            case value < root.data:
+                this.insert(value, root.left)
+                break;
+            case value > root.data:
+                this.insert(value, root.right)
+                break;
+            default:
+                console.log('error: duplicate insertion')
+                break;
+        }
+    }
 }
 function sortArray(array){
-    // obv gonna need better logic. . .
-    return array
+    const uniqueAndSorted = [...new Set(array)] // spread operator splits and Set rejoins uniquely
+        .sort((a, b) => a-b); // .sort compares a-b, if it's negative, b>a
+    return uniqueAndSorted
 }
 
 
