@@ -1,13 +1,19 @@
 // Build a Node class/factory. It should have an attribute for the data it stores as well as its left and right children.
 class Node{
-    constructor(data){
+    constructor(data, parent = null){
         this.data = data;
         this.left = null;
         this.right = null;
+        this.parent = parent;
     }
+
     setLeftAndRight(leftNode, rightNode){
         this.left = leftNode;
         this.right = rightNode;
+    }
+    clearChildren(){
+        this.left = null;
+        this.right = null;
     }
 }
 
@@ -44,6 +50,107 @@ export class Tree{
                 break;
         }
     }
+    find(value, root = this.root){
+        switch (true){
+            case value === root.data:
+                return 
+            case value < root.data
+                && root.left !== null:
+                {this.find(value, root.left); break;}
+            case value > root.data
+                && root.right !== null:
+                {this.find(value, root.right); break;}
+
+        }
+    }
+    findFurthestLeftOf(root = this.root){
+        if (root.left === null){
+            return root;
+          
+        }
+        if (root.left !== null){
+
+            return this.findFurthestLeftOf(root.left)
+        }
+    }
+    doubleBranchDelete(root = this.root){
+        if (root.right !== null){
+            const nextBiggest = this.findFurthestLeftOf(root.right)
+            switch (root){
+                case root.parent.left:
+                    root.parent.left = nextBiggest;
+                    break;
+                case root.parent.right:
+                    root.parent.right = nextBiggest;
+                    break;
+                default:
+                    console.log('T_T error in branch delete')
+                    break;
+
+                
+            }
+            root.data = nextBiggest.data
+            nextBiggest.data = null
+            if(nextBiggest.parent !== root){
+                nextBiggest.parent.left = null;
+            }else if(nextBiggest.parent === root){
+                // means that immediate right is furthest left
+                root.right = nextBiggest.right
+                root.left = nextBiggest
+            }
+        }
+        
+    }
+    delete(value, root = this.root){
+        switch(true){
+            // leaf cases only 
+            case value === root.data
+                && root.left === null
+                && root.right === null:
+                {root.parent.clearChildren(); break;}
+            case value < root.data
+                && root.left !== null:
+                {this.delete(value, root.left); break;}
+            case value > root.data
+                && root.right !== null:
+                {this.delete(value, root.right); break;}
+            // single branch
+            case value === root.data
+                && root.right === null:
+                {
+                    root.data = root.left.data; 
+                    root.left = null;
+                    break;
+                }
+            case value === root.data
+                && root.left === null:
+                {
+                    root.data = root.right.data;
+                    root.right = null; 
+                    break;
+                }
+            case value === root.data
+                && root.left !== null
+                && root.right !== null:
+                {   
+                    const nextBiggest = this.findFurthestLeftOf(root.right)
+                    root.data = nextBiggest.data
+                    nextBiggest.data = null
+                    if(nextBiggest.parent !== root){
+                        nextBiggest.parent.left = nextBiggest.right;
+                    }else if(nextBiggest.parent === root){
+                        // means that immediate right is furthest left
+                        root.right = nextBiggest.right
+                    }
+                    break;
+                }
+            default:
+                console.log('not found in tree. .. yet')
+                break
+            
+
+        }
+    }
 }
 function sortArray(array){
     const uniqueAndSorted = [...new Set(array)] // spread operator splits and Set rejoins uniquely
@@ -53,7 +160,7 @@ function sortArray(array){
 
 
 // Write a buildTree(array) function that takes an array of data (e.g., [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]) and turns it into a balanced binary tree full of Node objects appropriately placed (don’t forget to sort and remove duplicates!). The buildTree function should return the level-0 root node.
-function recursiveBuildTree(arr){
+function recursiveBuildTree(arr, parent = null){
     let startIndex = 0;
     let endIndex = arr.length-1;
     // find center
@@ -64,7 +171,7 @@ function recursiveBuildTree(arr){
     //     'midIndex':midIndex,
     //     'endIndex':endIndex
     // })
-    let root = new Node(arr[midIndex]);
+    let root = new Node(arr[midIndex], parent);
     // create new arrays
     let leftArray = arr.slice(startIndex, midIndex);
     let rightArray = arr.slice(midIndex+1);
@@ -75,8 +182,8 @@ function recursiveBuildTree(arr){
     // })
     
     root.setLeftAndRight(
-        recursiveBuildTree(leftArray), 
-        recursiveBuildTree(rightArray)
+        recursiveBuildTree(leftArray, root), 
+        recursiveBuildTree(rightArray, root)
     )
     // console.log({
     //     'root':root,
